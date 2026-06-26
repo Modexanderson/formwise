@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../smart_form_controller.dart';
+import '../validators/smart_validators.dart';
+import '../formatters/smart_formatters.dart';
 
 /// A smart text form field with built-in validation feedback,
 /// debounced validation, and shake-on-error animation.
@@ -102,6 +104,330 @@ class SmartTextFormField extends StatefulWidget {
     this.textCapitalization = TextCapitalization.none,
     this.readOnly = false,
   });
+
+  /// Creates an email field with typo detection, lowercase formatting,
+  /// and email keyboard type pre-configured.
+  ///
+  /// ```dart
+  /// SmartTextFormField.email(
+  ///   name: 'email',
+  ///   onTypoDetected: (suggestion) => print('Did you mean $suggestion?'),
+  /// )
+  /// ```
+  SmartTextFormField.email({
+    super.key,
+    required this.name,
+    this.formController,
+    this.controller,
+    this.asyncValidator,
+    this.validationDebounce = const Duration(milliseconds: 300),
+    this.shakeOnError = true,
+    this.autoValidate = true,
+    this.initialValue,
+    this.decoration,
+    String? labelText,
+    String? hintText,
+    this.prefixIcon = const Icon(Icons.email_outlined),
+    this.suffixIcon,
+    this.obscureText = false,
+    this.enabled = true,
+    this.maxLines = 1,
+    this.maxLength,
+    this.focusNode,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onFieldSubmitted,
+    this.textInputAction,
+    this.readOnly = false,
+    void Function(String suggestion)? onTypoDetected,
+    String? errorMessage,
+  })  : labelText = labelText ?? 'Email',
+        hintText = hintText ?? 'you@example.com',
+        keyboardType = TextInputType.emailAddress,
+        textCapitalization = TextCapitalization.none,
+        validator = SmartValidators.email(
+          errorMessage: errorMessage ?? 'Please enter a valid email address',
+          suggestCorrection: onTypoDetected,
+        ),
+        inputFormatters = [SmartFormatters.lowercase()];
+
+  /// Creates a phone number field with mask formatting, digit keyboard,
+  /// and phone validation pre-configured.
+  ///
+  /// ```dart
+  /// SmartTextFormField.phone(
+  ///   name: 'phone',
+  ///   mask: '+## (###) ###-####',
+  ///   minDigits: 10,
+  /// )
+  /// ```
+  SmartTextFormField.phone({
+    super.key,
+    required this.name,
+    this.formController,
+    this.controller,
+    this.asyncValidator,
+    this.validationDebounce = const Duration(milliseconds: 300),
+    this.shakeOnError = true,
+    this.autoValidate = true,
+    this.initialValue,
+    this.decoration,
+    String? labelText,
+    String? hintText,
+    this.prefixIcon = const Icon(Icons.phone_outlined),
+    this.suffixIcon,
+    this.obscureText = false,
+    this.enabled = true,
+    this.maxLines = 1,
+    this.maxLength,
+    this.focusNode,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onFieldSubmitted,
+    this.textInputAction,
+    this.readOnly = false,
+    String mask = '(###) ###-####',
+    int minDigits = 7,
+    int maxDigits = 15,
+    String? errorMessage,
+  })  : labelText = labelText ?? 'Phone',
+        hintText = hintText ?? '(123) 456-7890',
+        keyboardType = TextInputType.phone,
+        textCapitalization = TextCapitalization.none,
+        validator = SmartValidators.phone(
+          errorMessage: errorMessage ?? 'Please enter a valid phone number',
+          minDigits: minDigits,
+          maxDigits: maxDigits,
+        ),
+        inputFormatters = [SmartFormatters.phone(mask: mask)];
+
+  /// Creates a credit card number field with Luhn validation, card formatting,
+  /// and number keyboard pre-configured.
+  ///
+  /// Use [SmartValidators.detectCardBrand] in your [onChanged] callback
+  /// to detect the card brand as the user types.
+  ///
+  /// ```dart
+  /// SmartTextFormField.creditCard(
+  ///   name: 'card_number',
+  ///   onChanged: (value) {
+  ///     final brand = SmartValidators.detectCardBrand(value);
+  ///     setState(() => _brand = brand);
+  ///   },
+  /// )
+  /// ```
+  SmartTextFormField.creditCard({
+    super.key,
+    required this.name,
+    this.formController,
+    this.controller,
+    this.asyncValidator,
+    this.validationDebounce = const Duration(milliseconds: 300),
+    this.shakeOnError = true,
+    this.autoValidate = true,
+    this.initialValue,
+    this.decoration,
+    String? labelText,
+    String? hintText,
+    this.prefixIcon = const Icon(Icons.credit_card_outlined),
+    this.suffixIcon,
+    this.obscureText = false,
+    this.enabled = true,
+    this.maxLines = 1,
+    this.maxLength,
+    this.focusNode,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onFieldSubmitted,
+    this.textInputAction,
+    this.readOnly = false,
+    bool amexFormat = false,
+    String? errorMessage,
+  })  : labelText = labelText ?? 'Card Number',
+        hintText = hintText ?? '1234 5678 9012 3456',
+        keyboardType = TextInputType.number,
+        textCapitalization = TextCapitalization.none,
+        validator = SmartValidators.creditCard(
+          errorMessage: errorMessage ?? 'Please enter a valid card number',
+        ),
+        inputFormatters = [SmartFormatters.creditCard(amexFormat: amexFormat)];
+
+  /// Creates a URL field with URL validation, URL keyboard type,
+  /// and optional HTTPS enforcement.
+  ///
+  /// ```dart
+  /// SmartTextFormField.url(
+  ///   name: 'website',
+  ///   requireHttps: true,
+  /// )
+  /// ```
+  SmartTextFormField.url({
+    super.key,
+    required this.name,
+    this.formController,
+    this.controller,
+    this.asyncValidator,
+    this.validationDebounce = const Duration(milliseconds: 300),
+    this.shakeOnError = true,
+    this.autoValidate = true,
+    this.initialValue,
+    this.decoration,
+    String? labelText,
+    String? hintText,
+    this.prefixIcon = const Icon(Icons.link_outlined),
+    this.suffixIcon,
+    this.obscureText = false,
+    this.enabled = true,
+    this.maxLines = 1,
+    this.maxLength,
+    this.focusNode,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onFieldSubmitted,
+    this.textInputAction,
+    this.readOnly = false,
+    bool requireHttps = false,
+    List<String>? allowedSchemes,
+    String? errorMessage,
+  })  : labelText = labelText ?? 'URL',
+        hintText = hintText ?? 'https://example.com',
+        keyboardType = TextInputType.url,
+        textCapitalization = TextCapitalization.none,
+        validator = SmartValidators.url(
+          errorMessage: errorMessage ?? 'Please enter a valid URL',
+          requireHttps: requireHttps,
+          allowedSchemes: allowedSchemes,
+        ),
+        inputFormatters = [SmartFormatters.lowercase()];
+
+  /// Creates a numeric field with range validation and number keyboard.
+  ///
+  /// ```dart
+  /// SmartTextFormField.numeric(
+  ///   name: 'age',
+  ///   min: 0,
+  ///   max: 150,
+  ///   allowDecimals: false,
+  /// )
+  /// ```
+  SmartTextFormField.numeric({
+    super.key,
+    required this.name,
+    this.formController,
+    this.controller,
+    this.asyncValidator,
+    this.validationDebounce = const Duration(milliseconds: 300),
+    this.shakeOnError = true,
+    this.autoValidate = true,
+    this.initialValue,
+    this.decoration,
+    String? labelText,
+    this.hintText,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.obscureText = false,
+    this.enabled = true,
+    this.maxLines = 1,
+    this.maxLength,
+    this.focusNode,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onFieldSubmitted,
+    this.textInputAction,
+    this.readOnly = false,
+    double? min,
+    double? max,
+    bool allowDecimals = true,
+    String? errorMessage,
+  })  : labelText = labelText ?? 'Number',
+        keyboardType = TextInputType.numberWithOptions(
+          decimal: allowDecimals,
+          signed: min != null && min < 0,
+        ),
+        textCapitalization = TextCapitalization.none,
+        validator = SmartValidators.numericRange(
+          errorMessage: errorMessage ?? 'Please enter a valid number',
+          min: min,
+          max: max,
+          allowDecimals: allowDecimals,
+        ),
+        inputFormatters = allowDecimals
+            ? null
+            : [FilteringTextInputFormatter.digitsOnly];
+
+  /// Creates a password field with obscured text, configurable strength
+  /// validation, and a visibility toggle.
+  ///
+  /// ```dart
+  /// SmartTextFormField.password(
+  ///   name: 'password',
+  ///   minLength: 8,
+  ///   requireUppercase: true,
+  ///   requireDigit: true,
+  /// )
+  /// ```
+  SmartTextFormField.password({
+    super.key,
+    required this.name,
+    this.formController,
+    this.controller,
+    this.asyncValidator,
+    this.validationDebounce = const Duration(milliseconds: 300),
+    this.shakeOnError = true,
+    this.autoValidate = true,
+    this.initialValue,
+    this.decoration,
+    String? labelText,
+    String? hintText,
+    this.prefixIcon = const Icon(Icons.lock_outline),
+    this.suffixIcon,
+    this.enabled = true,
+    this.maxLines = 1,
+    this.maxLength,
+    this.focusNode,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onFieldSubmitted,
+    this.textInputAction,
+    this.readOnly = false,
+    int minLength = 8,
+    bool requireUppercase = false,
+    bool requireLowercase = false,
+    bool requireDigit = false,
+    bool requireSpecialChar = false,
+  })  : labelText = labelText ?? 'Password',
+        hintText = hintText ?? 'Enter your password',
+        keyboardType = TextInputType.visiblePassword,
+        textCapitalization = TextCapitalization.none,
+        obscureText = true,
+        inputFormatters = null,
+        validator = SmartValidators.compose([
+          SmartValidators.required(errorMessage: 'Password is required'),
+          SmartValidators.minLength(
+            length: minLength,
+            errorMessage: 'Must be at least $minLength characters',
+          ),
+          if (requireUppercase)
+            SmartValidators.pattern(
+              regex: RegExp(r'[A-Z]'),
+              errorMessage: 'Must contain an uppercase letter',
+            ),
+          if (requireLowercase)
+            SmartValidators.pattern(
+              regex: RegExp(r'[a-z]'),
+              errorMessage: 'Must contain a lowercase letter',
+            ),
+          if (requireDigit)
+            SmartValidators.pattern(
+              regex: RegExp(r'\d'),
+              errorMessage: 'Must contain a digit',
+            ),
+          if (requireSpecialChar)
+            SmartValidators.pattern(
+              regex: RegExp(r'[!@#$%^&*(),.?":{}|<>]'),
+              errorMessage: 'Must contain a special character',
+            ),
+        ]);
 
   @override
   State<SmartTextFormField> createState() => _SmartTextFormFieldState();
