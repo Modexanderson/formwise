@@ -1,6 +1,6 @@
 name: formwise
 description: "Smart form fields for Flutter with auto-validation, auto-formatting, typo detection, and animated error feedback. Supports email, phone, credit card, URL, and custom fields."
-version: 1.0.0
+version: 1.1.0
 homepage: https://github.com/modexanderson/formwise
 repository: https://github.com/modexanderson/formwise
 issue_tracker: https://github.com/modexanderson/formwise/issues
@@ -19,6 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  tflite_flutter: ^0.12.1
 
 dev_dependencies:
   flutter_test:
