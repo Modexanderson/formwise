@@ -19,3 +19,4 @@ library;
 export 'src/ml/model_loader.dart';
 export 'src/ml/text_preprocessor.dart';
 export 'src/ml/ml_validator.dart';
+export 'src/ml/email_ml_validator.dart';

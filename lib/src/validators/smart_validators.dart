@@ -1,74 +1,52 @@
+import 'email_typo_detector.dart';
+
 /// A collection of smart validators that go beyond simple regex matching.
 ///
 /// Each validator returns `null` if valid, or an error message string if invalid.
 class SmartValidators {
   SmartValidators._();
 
-  /// Common email domain typos and their corrections.
-  static const Map<String, String> _emailTypos = {
-    'gmial.com': 'gmail.com',
-    'gmal.com': 'gmail.com',
-    'gmaill.com': 'gmail.com',
-    'gamil.com': 'gmail.com',
-    'gnail.com': 'gmail.com',
-    'gmail.co': 'gmail.com',
-    'gmail.con': 'gmail.com',
-    'gmail.cm': 'gmail.com',
-    'gmai.com': 'gmail.com',
-    'gmil.com': 'gmail.com',
-    'yahooo.com': 'yahoo.com',
-    'yaho.com': 'yahoo.com',
-    'yahoo.co': 'yahoo.com',
-    'yahoo.con': 'yahoo.com',
-    'yhaoo.com': 'yahoo.com',
-    'hotmal.com': 'hotmail.com',
-    'hotmai.com': 'hotmail.com',
-    'hotmial.com': 'hotmail.com',
-    'hotmail.co': 'hotmail.com',
-    'hotmail.con': 'hotmail.com',
-    'outlok.com': 'outlook.com',
-    'outloo.com': 'outlook.com',
-    'outlook.co': 'outlook.com',
-    'outlook.con': 'outlook.com',
-    'iclod.com': 'icloud.com',
-    'icloud.co': 'icloud.com',
-    'icoud.com': 'icloud.com',
-    'protonmal.com': 'protonmail.com',
-    'protonmai.com': 'protonmail.com',
-  };
+  static const _typoDetector = EmailTypoDetector();
 
   /// Validates an email address with optional typo detection.
   ///
+  /// Uses Levenshtein edit distance against 55+ known email providers
+  /// to catch typos like `gmial.com → gmail.com`, `yaho.com → yahoo.com`.
+  ///
   /// When [suggestCorrection] is provided, it will be called with the
-  /// suggested domain correction if a typo is detected.
+  /// suggested email correction if a typo is detected.
+  ///
+  /// Use [customDomains] to add your organization's domains to the
+  /// known-good list (they won't trigger typo warnings).
   static String? Function(String?) email({
     String errorMessage = 'Please enter a valid email address',
     String typoMessage = 'Did you mean',
     void Function(String suggestion)? suggestCorrection,
+    List<String>? customDomains,
+    int maxTypoDistance = 2,
   }) {
+    final detector = customDomains != null
+        ? EmailTypoDetector(
+            domains: [...EmailTypoDetector.defaultDomains, ...customDomains],
+            maxDistance: maxTypoDistance,
+          )
+        : _typoDetector;
+
     return (String? value) {
       if (value == null || value.trim().isEmpty) return errorMessage;
 
       final trimmed = value.trim().toLowerCase();
 
-      // Basic structure check
       final emailRegex = RegExp(
         r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$',
       );
 
       if (!emailRegex.hasMatch(trimmed)) return errorMessage;
 
-      // Check for domain typos
-      final atIndex = trimmed.indexOf('@');
-      if (atIndex == -1) return errorMessage;
-
-      final domain = trimmed.substring(atIndex + 1);
-      final correction = _emailTypos[domain];
-
-      if (correction != null) {
-        final suggested = '${trimmed.substring(0, atIndex + 1)}$correction';
-        suggestCorrection?.call(suggested);
-        return '$typoMessage $suggested?';
+      final suggestion = detector.suggestCorrection(trimmed);
+      if (suggestion != null) {
+        suggestCorrection?.call(suggestion);
+        return '$typoMessage $suggestion?';
       }
 
       return null;
