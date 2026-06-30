@@ -18,6 +18,7 @@ library;
 
 export 'src/validators/smart_validators.dart';
 export 'src/validators/email_typo_detector.dart';
+export 'src/validators/postal_code_validator.dart';
 export 'src/formatters/smart_formatters.dart';
 export 'src/widgets/smart_text_form_field.dart';
 export 'src/smart_form_controller.dart';

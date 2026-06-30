@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../smart_form_controller.dart';
 import '../validators/smart_validators.dart';
+import '../validators/postal_code_validator.dart';
 import '../formatters/smart_formatters.dart';
 
 /// A smart text form field with built-in validation feedback,
@@ -428,6 +429,52 @@ class SmartTextFormField extends StatefulWidget {
               errorMessage: 'Must contain a special character',
             ),
         ]);
+
+  /// Creates a postal/zip code field with country-specific validation
+  /// and auto-formatting.
+  ///
+  /// ```dart
+  /// SmartTextFormField.postalCode(
+  ///   name: 'zip',
+  ///   country: PostalCountry.us,
+  /// )
+  /// ```
+  SmartTextFormField.postalCode({
+    super.key,
+    required this.name,
+    required PostalCountry country,
+    this.formController,
+    this.controller,
+    this.asyncValidator,
+    this.validationDebounce = const Duration(milliseconds: 300),
+    this.shakeOnError = true,
+    this.autoValidate = true,
+    this.initialValue,
+    this.decoration,
+    String? labelText,
+    String? hintText,
+    this.prefixIcon = const Icon(Icons.location_on_outlined),
+    this.suffixIcon,
+    this.obscureText = false,
+    this.enabled = true,
+    this.maxLines = 1,
+    this.maxLength,
+    this.focusNode,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onFieldSubmitted,
+    this.textInputAction,
+    this.readOnly = false,
+    String? errorMessage,
+  })  : labelText = labelText ?? 'Postal Code',
+        hintText = hintText ?? country.example,
+        keyboardType = TextInputType.text,
+        textCapitalization = TextCapitalization.characters,
+        validator = PostalCodeValidator.forCountry(
+          country,
+          errorMessage: errorMessage,
+        ),
+        inputFormatters = [PostalCodeFormatter(country)];
 
   @override
   State<SmartTextFormField> createState() => _SmartTextFormFieldState();
